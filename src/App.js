@@ -4,6 +4,7 @@ import Footer from "./components/Footer";
 import { Loader } from "react-feather";
 import Quotes from "./components/quotes/Quotes";
 import FavoriteQuotes from "./components/quotes/FavoriteQuotes";
+import Message from "./components/Message";
 import "./App.css";
 
 function App() {
@@ -11,6 +12,8 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [category, setCategory] = useState("All");
   const [favoriteQuotes, setFavoriteQuotes] = useState([]);
+  const [messageText, setMessageText] = useState("");
+  const [showMessage, setShowMessage] = useState(false);
 
   const quotesUrl =
     "https://gist.githubusercontent.com/skillcrush-curriculum/6365d193df80174943f6664c7c6dbadf/raw/1f1e06df2f4fc3c2ef4c30a3a4010149f270c0e0/quotes.js";
@@ -25,7 +28,6 @@ function App() {
       const request = await fetch(quotesUrl);
       const results = await request.json();
       setQuotes(results);
-      console.log(results);
     } catch (e) {
       console.log("Error: ", e);
     }
@@ -37,7 +39,6 @@ function App() {
   }, []);
 
   const handleCategoryChange = (e) => {
-    console.log("handleCategoryChange");
     setCategory(e.target.value);
   }
 
@@ -45,23 +46,32 @@ function App() {
     const selectedQuote = quotes.find(quote => quote.id === quoteId);
     const alreadyFavorite = favoriteQuotes.find(quote => quote.id === quoteId);
     if (alreadyFavorite) {
-      console.log("Already in favorites");
-    } else if (favoriteQuotes.length < maxFaves) {
-      setFavoriteQuotes([...favoriteQuotes, selectedQuote]);
-      console.log("Added to favorites");
+      removeFromFavorites(quoteId);
     } else {
-      console.log("Too many, please delete one first");
+      if (favoriteQuotes.length < maxFaves) {
+        setFavoriteQuotes([...favoriteQuotes, selectedQuote]);
+        setMessageText("Added to favorites!");
+        setShowMessage(true);
+      } else {
+        setMessageText("Too many favorites, please delete one first in order to save a new one.")
+        setShowMessage(true);
+      }
     }
-  }
+  };
 
   const removeFromFavorites = (quoteId) => {
     setFavoriteQuotes(favoriteQuotes.filter((quote) => quote.id !== quoteId));
+  }
+
+  const removeMessage = () => {
+    setShowMessage(false);
   }
 
   const filteredQuotes = quotes.filter(quote => category === "All" ? true : quote.categories.includes(category));
 
   return (
     <div className='App'>
+      {showMessage && <Message messageText={messageText} removeMessage={removeMessage} />}
       <Header />
       <main>
         <FavoriteQuotes favoriteQuotes={favoriteQuotes} maxFaves={maxFaves} removeFromFavorites={removeFromFavorites} />
