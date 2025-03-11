@@ -8,7 +8,7 @@ function Message({ messageText, removeMessage }) {
         }, 1500);
 
         return () => window.clearTimeout(messageTimeout);
-    }, []);
+    });
 
     return (
         <div className="message">
